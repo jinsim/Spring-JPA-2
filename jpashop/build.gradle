@@ -1,0 +1,48 @@
+plugins {
+	id 'org.springframework.boot' version '2.6.7'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'jpabook'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+// 롬복 때문에 생긴 세팅
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+// mavenCentral에서 라이브러리 다운 받겠다.
+repositories {
+	mavenCentral()
+}
+
+// 우리가 프로젝트를 생성하며 선택한 것들.
+// Spring boot Starter라는 라이브러리를 다운받으면, 필요한 의존관계들을 다 가져와준다.
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// html만 컴파일하면 바로 반영할 수 있도록 추가.
+	implementation 'org.springframework.boot:spring-boot-devtools'
+	// 로그 관련 외부 라이브러리 추가
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.6'
+	// 스프링 부트 2.3부터 validation을 제공해주지 않아서 직접 주입해야 한다. (@NotEmpty 사용 위함)
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.h2database:h2'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	// JUnit4 추가
+	testImplementation("org.junit.vintage:junit-vintage-engine") {
+		exclude group: "org.hamcrest", module: "hamcrest-core"
+	}
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
