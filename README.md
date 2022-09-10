@@ -1,5 +1,5 @@
 ## spring-jpa-2
-인프런, 김영한 님의 강의인 "스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술"을 읽고 정리해두었습니다. https://www.inflearn.com/course/스프링부트-JPA-API개발-성능최적화
+인프런, 김영한 님의 강의인 "실전! 스프링 부트와 JPA 활용2 - API 개발과 성능 최적화"을 읽고 정리해두었습니다. https://www.inflearn.com/course/스프링부트-JPA-API개발-성능최적화
 
 ### 필기
 
