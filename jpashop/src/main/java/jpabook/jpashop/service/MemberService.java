@@ -47,7 +47,6 @@ public class MemberService {
     }
 
     // 회원 전체 조회
-
     public List<Member> findMembers() {
         return memberRepository.findAll();
     }
@@ -55,5 +54,18 @@ public class MemberService {
     // id로 회원 단건 조회
     public Member findOne(Long memberId) {
         return memberRepository.findOne(memberId);
+    }
+
+    /**
+     * 회원 수정
+     * Transactional을 붙이고 영속성 컨텍스트에서 엔티티를 꺼내서 변경한다.
+     * 트랜젝션이 커밋될 때 변경 감지로 인해 변경이 일어난다.
+     * 반환값을 Member로 설정하면, 변경을 하는 command와 member 객체를 id로 조회하는 sql이 같이 있게 된다.
+     * 위 둘을 구분하는 것이 좋다.
+     */
+    @Transactional
+    public void update(Long id, String name) {
+        Member member = memberRepository.findOne(id);
+        member.setName(name);
     }
 }
