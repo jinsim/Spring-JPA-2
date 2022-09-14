@@ -111,4 +111,17 @@ public class OrderRepository {
 
         return query.getResultList();
     }
+
+    public List<Order> findAllWithMemberDelivery() {
+        // Order와 Member와 Delivery를 Join해서 select 절에다가 다 넣고, 한번에 다 땡겨오는 것
+        // LAZY로 설정되어 있지만 무시하고, 프록시도 아니라 진짜 객체의 값을 다 채워서 가져온다.
+        // = FETCH JOIN.
+        // 기술적으로는 SQL에 JOIN을 사용하는데, FETCH라는 명령어는 SQL에 없다. JPA에만 있는 문법이다.
+        // 패치 조인의 경우, JPA 기본편 강의를 참고하여 100% 이해하는 것이 좋다.
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d", Order.class
+        ).getResultList();
+    }
 }
