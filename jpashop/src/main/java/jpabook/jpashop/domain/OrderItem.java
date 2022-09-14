@@ -11,6 +11,7 @@ import javax.persistence.*;
 
 @Entity
 @Getter @Setter
+// static 생성 메서드 말고, 일반 생성자로 생성을 막기 위해서.
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
 
@@ -20,7 +21,6 @@ public class OrderItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
-    @JsonIgnore
     private Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
