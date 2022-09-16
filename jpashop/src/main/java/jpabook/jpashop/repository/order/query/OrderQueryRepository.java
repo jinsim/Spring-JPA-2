@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,6 +33,48 @@ public class OrderQueryRepository {
     }
 
     /**
+     * 최적화
+     * Query: 루트 1번, 컬렉션 1번
+     * 데이터를 한꺼번에 처리할 때 많이 사용하는 방식
+     */
+    public List<OrderQueryDto> findAllByDto_optimization() {
+        // 루트 조회(toOne 코드를 모두 한번에 조회)
+        List<OrderQueryDto> result = findOrders();
+
+        // result를 orderItemMap으로 만들어 메모리에 올린다.
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(toOrderIds(result));
+
+        // orderItemMap에서 해당 식별자를 가진 orderItem을 찾아서 채운다.
+        result.forEach(o -> o.setOrderItems(orderItemMap.get(o.getOrderId())));
+
+        return result;
+    }
+
+    private Map<Long, List<OrderItemQueryDto>> findOrderItemMap(List<Long> orderIds) {
+        // 가져온 orderIds를 넣어서 OrderItemQueryDto를 만들어 가져온다.
+        List<OrderItemQueryDto> orderItems = em.createQuery(
+                "select new jpabook.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count)" +
+                        " from OrderItem oi" +
+                        " join oi.item i" +
+                        " where oi.order.id in :orderIds", OrderItemQueryDto.class)
+                .setParameter("orderIds", orderIds)
+                .getResultList();
+
+        // 리스트를 map으로 최적화. orderId를 기준으로 map으로 변경한다.
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = orderItems.stream()
+                .collect(Collectors.groupingBy(orderItemQueryDto -> orderItemQueryDto.getOrderId()));
+        return orderItemMap;
+    }
+
+    private List<Long> toOrderIds(List<OrderQueryDto> result) {
+        // 루프를 돌면서 OrderQueryDto에서 Id를 가져온다. -> orderId의 리스트가 된다.
+        List<Long> orderIds = result.stream()
+                .map(o -> o.getOrderId())
+                .collect(Collectors.toList());
+        return orderIds;
+    }
+
+    /**
      * 1:N 관계(컬렉션)를 제외한 나머지를 한번에 조회
      */
     private List<OrderQueryDto> findOrders() {
@@ -52,9 +96,9 @@ public class OrderQueryRepository {
                 "select new jpabook.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count)" +
                         " from OrderItem oi" +
                         " join oi.item i" + // OrderItem에서 Item은 ToOne 관계이므로 조인해도 된다.
-                        " where oi.order.id = : orderId",
-                        OrderItemQueryDto.class)
+                        " where oi.order.id = : orderId", OrderItemQueryDto.class)
                 .setParameter("orderId", orderId)
                 .getResultList();
     }
+
 }
