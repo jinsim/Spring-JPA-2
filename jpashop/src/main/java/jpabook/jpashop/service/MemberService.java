@@ -52,7 +52,7 @@ public class MemberService {
 
     // id로 회원 단건 조회
     public Member findOne(Long memberId) {
-        return memberRepository.findOne(memberId);
+        return memberRepository.findById(memberId).get();
     }
 
     /**
@@ -64,7 +64,7 @@ public class MemberService {
      */
     @Transactional
     public void update(Long id, String name) {
-        Member member = memberRepository.findOne(id);
+        Member member = memberRepository.findById(id).get();
         member.setName(name);
     }
 }

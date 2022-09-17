@@ -41,7 +41,7 @@ public class MemberServiceTest {
         //then
         em.flush(); // 영속성 컨텍스트에 있는 등록이나 변경 내용을 DB에 반영한다.
         // 테스트가 종료되면 @Transactional의 영향으로 롤백된다
-        assertEquals(member, memberRepository.findOne(savedId));
+        assertEquals(member, memberRepository.findById(savedId).get());
         // JPA에서 같은 트랜젝션 안에서 PK 값이 똑같으면, 같은 영속성 컨텍스트에서 하나로 관리된다. 따라서 True
     }
 
