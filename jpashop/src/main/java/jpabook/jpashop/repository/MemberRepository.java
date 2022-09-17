@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Repository // 스프링을 사용하므로 사용 가능. 컴포넌트 스캔의 대상이 돼서 자동으로 스프링 빈으로 관리된다.
