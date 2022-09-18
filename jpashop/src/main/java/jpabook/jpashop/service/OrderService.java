@@ -71,6 +71,6 @@ public class OrderService {
      * 아키텍쳐를 어떻게 다루는지에 따라서 다르다.
      */
     public List<Order> findOrders(OrderSearch orderSearch) {
-        return orderRepository.findAllByString(orderSearch);
+        return orderRepository.findAll(orderSearch);
     }
 }

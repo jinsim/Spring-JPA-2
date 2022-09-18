@@ -1,6 +1,8 @@
 package jpabook.jpashop.repository;
 
-import jpabook.jpashop.domain.Member;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jpabook.jpashop.domain.*;
 import jpabook.jpashop.domain.Order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -13,10 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
 public class OrderRepository {
 
     private final EntityManager em;
+    private final JPAQueryFactory query;
+
+    public OrderRepository(EntityManager em) {
+        this.em = em;
+        this.query = new JPAQueryFactory(em);
+    }
 
     public void save(Order order) {
         em.persist(order);
@@ -25,7 +32,6 @@ public class OrderRepository {
     public Order findOne(Long id) {
         return em.find(Order.class, id);
     }
-
 
 
     /*      만들어야 하는 JPQL
@@ -114,10 +120,47 @@ public class OrderRepository {
     /**
      * QueryDSL 로 작성
      */
-//    public List<Order> findAll(OrderSearch orderSearch) {
-//        // QueryDSL을 만드려면, Q라는 파일을 생성해야 한다. (단점)
-//
-//    }
+    public List<Order> findAll(OrderSearch orderSearch) {
+        // 생성자를 만들어서 this.query에 넣는 방법도 있다.
+//        JPAQueryFactory query = new JPAQueryFactory(em);
+
+        // QueryDSL을 만드려면, Q라는 파일을 미리 생성해야 한다. (단점)
+        // Q파일을 통해서 변수 선언
+        // static import로 줄여서 사용할 수도 있다.
+        QOrder order = QOrder.order;
+        QMember member = QMember.member;
+
+        // 아래의 쿼리가 JPQL로 변환돼서 실행된다. 코드가 직관적이다.
+        // 100% 자바 코드이기 때문에, 오타를 컴파일 오류로 바로 볼 수 있다.
+        return query
+                .select(order)
+                .from(order)
+                // order에서 member를 join하고, alias를 위에 변수로 선언한 member로 둔다.
+                .join(order.member, member)
+                // 정적 쿼리. JPQL
+//                .where(order.status.eq(orderSearch.getOrderStatus()), member.name.like(orderSearch.getMemberName()))
+                // 동적 쿼리. QueryDSL
+                .where(statusEq(orderSearch.getOrderStatus()), nameLike(orderSearch.getMemberName()))
+                .limit(1000)
+                .fetch();
+    }
+
+    // OrderStatus가 같은지 비교하는 메서드
+    private BooleanExpression statusEq(OrderStatus statusCond) {
+        // 상태가 없으면 아무것도 하지 않는다.
+        if (statusCond == null) {
+            return null;
+        }
+        return QOrder.order.status.eq(statusCond);
+    }
+
+    // MemberName이 같은지 비교하는 메서드
+    private BooleanExpression nameLike(String memberName) {
+        if (StringUtils.hasText(memberName)) {
+            return null;
+        }
+        return QMember.member.name.like(memberName);
+    }
 
     public List<Order> findAllWithMemberDelivery() {
         // Order와 Member와 Delivery를 Join해서 select 절에다가 다 넣고, 한번에 다 땡겨오는 것
