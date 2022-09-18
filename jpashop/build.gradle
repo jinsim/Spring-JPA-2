@@ -1,7 +1,16 @@
+// QueryDSL 추가
+buildscript {
+	ext {
+		queryDslVersion = "5.0.0"
+	}
+}
+
 plugins {
 	id 'org.springframework.boot' version '2.6.7'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	// QueryDSL 추가
+	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 }
 
 group = 'jpabook'
@@ -49,8 +58,31 @@ dependencies {
 		exclude group: "org.hamcrest", module: "hamcrest-core"
 	}
 
+	// QueryDSL 추가
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// QueryDSL 추가
+// Gradle의 빌드 위치에 Q 파일 생성. build/generated/querydsl
+// build 폴더는 보통 git에 함께 올리지 않는다.
+// 생성된 파일은 git에 함께 올려서 관리하지 않기 때문에 이렇게 빌드 폴더에 넣어두고, 관리하는 것이 더 좋다.
+def querydslDir = "$buildDir/generated/querydsl"
+querydsl {
+	library = "com.querydsl:querydsl-apt"
+	jpa = true
+	querydslSourcesDir = querydslDir
+}
+sourceSets {
+	main.java.srcDir querydslDir
+}
+configurations {
+	querydsl.extendsFrom compileClasspath
+}
+compileQuerydsl {
+	options.annotationProcessorPath = configurations.querydsl
 }

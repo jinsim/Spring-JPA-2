@@ -111,6 +111,13 @@ public class OrderRepository {
 
         return query.getResultList();
     }
+    /**
+     * QueryDSL 로 작성
+     */
+//    public List<Order> findAll(OrderSearch orderSearch) {
+//        // QueryDSL을 만드려면, Q라는 파일을 생성해야 한다. (단점)
+//
+//    }
 
     public List<Order> findAllWithMemberDelivery() {
         // Order와 Member와 Delivery를 Join해서 select 절에다가 다 넣고, 한번에 다 땡겨오는 것
